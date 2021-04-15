@@ -186,7 +186,7 @@ function StakerDashboard(props) {
                         { !busySetRestaking ? <>
                           <Toggle
                             data-testid="restaking-toggle"
-                            checked={store.stakerStore.staker.flags.reStake}
+                            checked={store.stakerStore.staker.flags.reStake ? true : false}
                             onChange={toggleRestaking}>
                           </Toggle>
                         </> : <Loading size={20}></Loading> }
@@ -209,7 +209,7 @@ function StakerDashboard(props) {
                     { !busySetWindDown ? <>
                       <Toggle
                         data-testid="winddown-toggle"
-                        checked={store.stakerStore.staker.flags.windDown}
+                        checked={store.stakerStore.staker.flags.windDown ? true : false}
                         onChange={toggleWindDown}>
                       </Toggle>
                     </> : <Loading size={20}></Loading> }
