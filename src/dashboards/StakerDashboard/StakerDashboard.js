@@ -154,10 +154,7 @@ function StakerDashboard(props) {
               <p className="h6 text-center">Current period</p>
               <p className="h4 text-center">{store.currentPeriod}</p>
             </Col>
-            <Col>
-              <p className="h6 text-center">Next period in</p>
-              <p className="h4 text-center">{timeTo0UTC()}</p>
-            </Col>
+            <Col></Col>
           </Row>
           <Row className="mt-5 tokens-row">
             <Col>

@@ -82,6 +82,7 @@ function Stakes(props) {
               {
                 substake.remainingDuration !== 0 ?
               <Button data-testid={ `merge-button-${i}` } className="m-1" variant="secondary" size="sm" onClick={toggleMergeRow(i)}><small>Merge</small></Button>: null }
+              {substake.unlockableNextPeriod ? <small>unlockable next period</small> : null}
             </div>
           </div>
           <Collapse in={divideCollapse[i]} className="mt-4">

@@ -7,6 +7,7 @@ export const daysToPeriods = (days) => {
   return Math.ceil(parseInt(days)/daysPerPeriod).toString()
 }
 
+
 function shortenHex(hex) {
   return `${hex.substring(0, 6)}`;
 }

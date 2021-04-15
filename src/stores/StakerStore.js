@@ -10,7 +10,6 @@ export const stakeFormatter = object => {
   const periodMS = 86400000 * daysPerPeriod;
   let currentDate = Date.now();
 
-  console.log(object)
   let endDate = new Date(object.lastPeriod * periodMS);
 
   return {
@@ -22,7 +21,7 @@ export const stakeFormatter = object => {
     endYear: new Date(object.lastPeriod * periodMS).toDateString().slice(-4),
     isActive: endDate > currentDate,
     periodsLeft: parseInt(object.periods),
-    unlockableNextPeriod: object.lastPeriod != "1" && object.unlockingDuration === "0",
+    unlockableNextPeriod: object.lastPeriod != "1" && object.periods === "0",
   }
 }
 
@@ -36,7 +35,7 @@ class StakerStore {
     const web3 = Web3Initilizer.getWeb3();
     const account = address || (await web3.eth.getAccounts())[0];
     const staker = new Staker(await contract.methods.stakerInfo(account).call());
-    staker.lockedTokens = await contract.methods.getLockedTokens(account, 1).call();
+    staker.lockedTokens = await contract.methods.getLockedTokens(account, 0).call();
     staker.availableForWithdraw = (new web3.utils.BN(staker.value)).sub(new web3.utils.BN(staker.lockedTokens)).toString();
     if (!isHexNil(staker.worker)) {
       staker.lastActivePeriod = await contract.methods.getLastCommittedPeriod(account).call();
@@ -64,7 +63,8 @@ class StakerStore {
         firstPeriod: formatted.startDay,
         lastPeriod: formatted.endDay,
         value: subStake.lockedValue,
-        remainingDuration: formatted.periodsLeft
+        remainingDuration: formatted.periodsLeft,
+        unlockableNextPeriod: formatted.unlockableNextPeriod
       }));
     }
     this.staker.substakes = substakes;
