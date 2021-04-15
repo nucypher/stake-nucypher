@@ -1,6 +1,13 @@
 import BN from 'bignumber.js';
 import Web3 from 'web3';
 
+export const daysPerPeriod = 7
+
+export const daysToPeriods = (days) => {
+  return Math.ceil(parseInt(days)/daysPerPeriod).toString()
+}
+
+
 function shortenHex(hex) {
   return `${hex.substring(0, 6)}`;
 }

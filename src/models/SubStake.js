@@ -7,6 +7,7 @@ class SubStake {
     this.lastPeriod = obj.lastPeriod;
     this.value = obj.value;
     this.remainingDuration = obj.remainingDuration;
+    this.unlockableNextPeriod = obj.unlockableNextPeriod
   }
 }
 

@@ -68,15 +68,21 @@ function Stakes(props) {
             <div className="table-row-column table-row-index">{i}</div>
             <div className="table-row-column table-center">{toUiNumberOfTokens(substake.value)} NU</div>
             <div className="table-row-column table-center">{substake.remainingDuration} periods</div>
-            <div className="table-row-column table-center">{dateFormat(substake.firstPeriod)} - {dateFormat(substake.lastPeriod)}</div>
-            <div className="table-row-column table-center">
-              <Button data-testid={ `divide-button-${i}` } className="m-1" variant="secondary" size="sm" onClick={toggleDivideRow(i)}>Divide</Button>
+            <div className="table-row-column table-center"><small>{substake.firstPeriod} - {substake.lastPeriod}</small></div>
+            <div className="table-row-column table-center w188">
+            {
+                substake.remainingDuration !== 0 ?
+              <Button data-testid={ `divide-button-${i}` } className="m-1" variant="secondary" size="sm" onClick={toggleDivideRow(i)}><small>Divide</small></Button> : null
+            }
               {
                 substake.remainingDuration !== 0 ? <>
-                  <Button data-testid={ `prolong-button-${i}` } className="m-1" variant="secondary" size="sm" onClick={toggleProlongRow(i)}>Prolong</Button>
+                  <Button data-testid={ `prolong-button-${i}` } className="m-1" variant="secondary" size="sm" onClick={toggleProlongRow(i)}><small>Prolong</small></Button>
                 </> : null
               }
-              <Button data-testid={ `merge-button-${i}` } className="m-1" variant="secondary" size="sm" onClick={toggleMergeRow(i)}>Merge</Button>
+              {
+                substake.remainingDuration !== 0 ?
+              <Button data-testid={ `merge-button-${i}` } className="m-1" variant="secondary" size="sm" onClick={toggleMergeRow(i)}><small>Merge</small></Button>: null }
+              {substake.unlockableNextPeriod ? <small>unlockable next period</small> : null}
             </div>
           </div>
           <Collapse in={divideCollapse[i]} className="mt-4">
@@ -88,19 +94,15 @@ function Stakes(props) {
               </Row>
             </Container>
           </Collapse>
-          {
-            substake.remainingDuration !== 0 ? <>
-              <Collapse in={prolongCollapse[i]} className="mt-4">
-                <Container>
-                  <Row>
-                    <Col>
-                      <ProlongSubStake subStake={substake} onSubStakeProlong={onSubStakeProlong.bind(substake)}></ProlongSubStake>
-                    </Col>
-                  </Row>
-                </Container>
-              </Collapse>
-            </> : null
-          }
+          <Collapse in={prolongCollapse[i]} className="mt-4">
+            <Container>
+              <Row>
+                <Col>
+                  <ProlongSubStake subStake={substake} onSubStakeProlong={onSubStakeProlong.bind(substake)}></ProlongSubStake>
+                </Col>
+              </Row>
+            </Container>
+          </Collapse>
           <Collapse in={mergeCollapse[i]} className="mt-4">
             <Container>
               <Row>

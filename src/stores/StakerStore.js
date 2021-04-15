@@ -1,9 +1,30 @@
 import { observable, action, decorate } from 'mobx';
 import Staker from '../models/Staker';
 import SubStake from '../models/SubStake';
-import { isHexNil } from '../utils/utils';
+import { isHexNil, daysPerPeriod, daysToPeriods } from '../utils/utils';
 import Web3Initilizer from '../web3Initializer';
 import BN from 'bignumber.js';
+
+
+export const stakeFormatter = object => {
+  const periodMS = 86400000 * daysPerPeriod;
+  let currentDate = Date.now();
+
+  let endDate = new Date(object.lastPeriod * periodMS);
+
+  return {
+    value: (object.lockedValue / 10 ** 18).toLocaleString("en-Us"),
+    startDay: new Date(object.firstPeriod * periodMS).toUTCString().slice(4, 16),
+    startYear: new Date(object.firstPeriod * periodMS).toDateString().slice(-4),
+    currentDate: currentDate / periodMS,
+    endDay: object.lastPeriod === "1" ? "Unlocked": (endDate).toUTCString().slice(4, 16),
+    endYear: new Date(object.lastPeriod * periodMS).toDateString().slice(-4),
+    isActive: endDate > currentDate,
+    periodsLeft: parseInt(object.periods),
+    unlockableNextPeriod: object.lastPeriod != "1" && object.periods === "0",
+  }
+}
+
 
 class StakerStore {
   staker = null;
@@ -14,7 +35,7 @@ class StakerStore {
     const web3 = Web3Initilizer.getWeb3();
     const account = address || (await web3.eth.getAccounts())[0];
     const staker = new Staker(await contract.methods.stakerInfo(account).call());
-    staker.lockedTokens = await contract.methods.getLockedTokens(account, 1).call();
+    staker.lockedTokens = await contract.methods.getLockedTokens(account, 0).call();
     staker.availableForWithdraw = (new web3.utils.BN(staker.value)).sub(new web3.utils.BN(staker.lockedTokens)).toString();
     if (!isHexNil(staker.worker)) {
       staker.lastActivePeriod = await contract.methods.getLastCommittedPeriod(account).call();
@@ -33,22 +54,17 @@ class StakerStore {
     const substakes = [];
     for (let currentSubStakeIndex = 0; currentSubStakeIndex < substakesCount; currentSubStakeIndex++) {
       const subStake = await contract.methods.getSubStakeInfo(account, currentSubStakeIndex).call();
-      const firstPeriod = new Date(1000 * 60 * 60 * 24 * subStake.firstPeriod);
-      let lastPeriod;
-      if (subStake.lastPeriod === '0') {
-        lastPeriod = new Date();
-        lastPeriod.setTime(lastPeriod.getTime() + ((+subStake.periods + 1) * 24 * 60 * 60 * 1000));
-        lastPeriod.setHours(0, 0, 0, 0);
-      } else {
-        lastPeriod = new Date(1000 * 60 * 60 * 24 * (+subStake.lastPeriod + 1));
-        lastPeriod.setHours(0, 0, 0, 0);
-      }
+      subStake.lastPeriod = await contract.methods.getLastPeriodOfSubStake(account, currentSubStakeIndex).call();
+
+      const formatted = stakeFormatter(subStake);
+
       substakes.push(new SubStake({
         index: currentSubStakeIndex,
-        firstPeriod,
-        lastPeriod,
+        firstPeriod: formatted.startDay,
+        lastPeriod: formatted.endDay,
         value: subStake.lockedValue,
-        remainingDuration: (+subStake.periods) + 1
+        remainingDuration: formatted.periodsLeft,
+        unlockableNextPeriod: formatted.unlockableNextPeriod
       }));
     }
     this.staker.substakes = substakes;
